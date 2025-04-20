@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Account</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: #000;
+      color: white;
+    }
+
+    header {
+      background-color: #000;
+      text-align: center;
+      padding: 1rem;
+      font-size: 1.2rem;
+    }
+
+    .welcome-section {
+      background-color: #091dfc;
+      text-align: left;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      margin-bottom: 2rem
+    }
+
+    .welcome-content {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .left-align {
+      justify-content: flex-start;
+    }
+
+    .welcome-content img {
+      width: 100px;
+      height: 100px;
+    }
+
+    .welcome-content h2 {
+      font-size: 1.5rem;
+      color: white;
+      margin: 0;
+    }
+
+    .balance-card {
+      background-color: #222;
+      margin: -2rem 1rem 1rem;
+      padding: 1.5rem;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .balance-card .amount {
+      font-size: 1.3rem;
+      color: orange;
+      margin-bottom: 0.3rem;
+    }
+
+    .balance-card .usd {
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+
+    .balance-card .label {
+      margin: 0.5rem 0 1rem;
+      color: #aaa;
+    }
+
+    .balance-card .buttons {
+      display: flex;
+      justify-content: space-around;
+      gap: 1rem;
+    }
+
+    .balance-card button {
+      background-color: #1a2cff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .welcome-message {
+      background-color: #222;
+      margin: 1rem;
+      padding: 1rem;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .welcome-message i {
+      color: #1a2cff;
+      margin-right: 8px;
+    }
+
+    .services {
+      margin: 1rem;
+    }
+
+    .services h3 {
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+
+    .service-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+
+    .service-item {
+      background-color: #222;
+      border-radius: 8px;
+      padding: 0.8rem 0;
+      text-align: center;
+      font-size: 0.8rem;
+      color: white;
+      cursor: pointer;
+    }
+
+    .service-item i {
+      font-size: 1.2rem;
+      display: block;
+      margin-bottom: 0.3rem;
+      color: #1a2cff;
+    }
+  </style>
+</head>
+<body>
+  <header>TradeVanta Earnings Dashboard </header>
+
+  <div class="welcome-section">
+    <div class="welcome-content">
+      <img src="https://i.postimg.cc/g2F6zV66/IMG-9529.png?v=026" alt="Tether Logo" />
+      <h2 id="welcome-username">Welcome</h2>
+    </div>
+  </div>
+
+  <div class="balance-card">
+    <div class="amount"><span id="balance-amount" class="usd">≈ 0.00</span></div>
+    <div class="label">Balance</div>
+    <div class="buttons">
+      <button id="deposit-button"><i class="fas fa-wallet"></i>Deposit</button>
+      <button id="withdraw-button"><i class="fas fa-arrow-up"></i>Withdraw</button>
+      <button id="transfer-button"><i class="fas fa-exchange-alt"></i>Transfer</button>
+    </div>
+  </div>
+
+  <div class="welcome-message">
+    <i class="fas fa-bell"></i>TradeVanta Finance
+  </div>
+
+  <div class="services">
+    <h3>Other Services</h3>
+    <div class="service-grid">
+      <div class="service-item"><i class="fas fa-briefcase"></i>Financing</div>
+      <div class="service-item"><i class="fas fa-shield-alt"></i>Security</div>
+      <div class="service-item"><i class="fas fa-comment-dots"></i>Message</div>
+      <div class="service-item"><i class="fas fa-headset"></i>Contact</div>
+      <div class="service-item"><i class="fas fa-question-circle"></i>Questions</div>
+      <div class="service-item"><i class="fas fa-wallet"></i>Wallet</div>
+      <div class="service-item" onclick="window.location.href='login.html';"><i class="fas fa-power-off"></i>Logout</div>
+    </div>
+  </div>
+
+  <!-- JivoChat Script -->
+  <script>
+    function openJivoChat() {
+      if (window.jivo_api) jivo_api.open();
+    }
+
+    document.getElementById('deposit-button').addEventListener('click', openJivoChat);
+    document.getElementById('withdraw-button').addEventListener('click', openJivoChat);
+    document.getElementById('transfer-button').addEventListener('click', openJivoChat);
+
+    const serviceItems = document.querySelectorAll('.service-item');
+    serviceItems.forEach(item => {
+      if (!item.querySelector('.fa-power-off')) {
+        item.addEventListener('click', openJivoChat);
+      }
+    });
+
+    function updateBalance(balance, currency) {
+      const symbol = {
+        USD: '$',
+        EUR: '€',
+        GBP: '£',
+        INR: '₹',
+        CAD: 'C$',
+        AUD: 'A$',
+        NGN: '₦',
+        JPY: '¥'
+      }[currency] || '$';
+
+      document.getElementById('balance-amount').textContent = `≈ ${symbol}${parseFloat(balance).toFixed(2)}`;
+    }
+  </script>
+
+  <!-- Jivochat Widget -->
+  <script>
+    (function () {
+      var widget_id = 'wV6zTzxS5q';
+      var d = document;
+      var w = window;
+      function l() {
+        var s = document.createElement('script');
+        s.type = 'text/javascript';
+        s.async = true;
+        s.src = '//code.jivosite.com/script/widget/' + widget_id;
+        var ss = document.getElementsByTagName('script')[0];
+        ss.parentNode.insertBefore(s, ss);
+      }
+      if (d.readyState == 'complete') {
+        l();
+      } else {
+        if (w.attachEvent) {
+          w.attachEvent('onload', l);
+        } else {
+          w.addEventListener('load', l, false);
+        }
+      }
+    })();
+  </script>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import {
+      getFirestore,
+      doc,
+      onSnapshot,
+      updateDoc
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDtCf….xxx",
+  authDomain: "tradevanta-a3e0d.firebaseapp.com",
+  projectId: "tradevanta-a3e0d",
+  storageBucket: "tradevanta-a3e0d.appspot.com",
+  messagingSenderId: "441098922985",
+  appId: "1:441098922985:web:163878a0ef5b2054f8b978"
+};
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    function listenToUserData() {
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        console.error("User ID not found in localStorage.");
+        return;
+      }
+
+      const userRef = doc(db, "users", userId);
+
+      onSnapshot(userRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          document.getElementById("welcome-username").textContent = `Welcome, ${data.username || 'User'}`;
+          updateBalance(data.balance || 0, data.currency || 'USD');
+        } else {
+          console.log("User document does not exist.");
+        }
+      }, (error) => {
+        console.error("Error listening to user document:", error);
+      });
+    }
+
+    async function manuallyUpdateBalance(newBalance) {
+      const userId = localStorage.getItem("userId");
+      const userRef = doc(db, "users", userId);
+      await updateDoc(userRef, { balance: newBalance });
+    }
+
+    async function updateUserCurrency(newCurrency) {
+      const userId = localStorage.getItem("userId");
+      const userRef = doc(db, "users", userId);
+      await updateDoc(userRef, { currency: newCurrency });
+    }
+
+    document.addEventListener("DOMContentLoaded", listenToUserData);
+  </script>
+</body>
+</html>
