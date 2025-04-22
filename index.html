@@ -44,7 +44,7 @@
 
     .quotation .coin-item {
       align-items: center;
-      background-color: #C70039;
+      background-color: ##000000;
       border-radius: 10px;
       padding: 10px;
       margin-bottom: 5px;
@@ -73,16 +73,43 @@
     <h1>Bit Digital Mining Online</h1>
   </header>
 
+<!-- Slider Section -->
 <section class="slider">
   <div class="slider-wrapper" id="slider-wrapper">
     <img src="https://i.postimg.cc/2y3BnkHX/IMG-1986.jpg" alt="Slide 1" class="slider-image">
     <img src="https://i.postimg.cc/PqtJmfJz/IMG-1985.jpg?raw=true" alt="Slide 2" class="slider-image">
     <img src="https://i.postimg.cc/vHFV4srX/IMG-1984.jpg?raw=true" alt="Slide 3" class="slider-image">
     <img src="https://i.postimg.cc/Sscm5wnN/IMG-1987.jpg?raw=true" alt="Slide 4" class="slider-image">
-    <!-- Cloned first slide -->
-    <img src="https://i.postimg.cc/2y3BnkHX/IMG-1986.jpg" alt="Slide 1 Clone" class="slider-image">
+    <img src="https://i.postimg.cc/2y3BnkHX/IMG-1986.jpg" alt="Slide 1 Clone" class="slider-image" id="clone">
   </div>
 </section>
+
+<script>
+  const sliderWrapper = document.getElementById('slider-wrapper');
+  const images = sliderWrapper.querySelectorAll('.slider-image');
+  let counter = 0;
+
+  function slide() {
+    const slideWidth = images[0].clientWidth;
+    sliderWrapper.style.transition = 'transform 0.5s ease-in-out';
+    sliderWrapper.style.transform = `translateX(${-slideWidth * counter}px)`;
+  }
+
+  function nextSlide() {
+    counter++;
+    slide();
+
+    if (counter === images.length - 1) {
+      setTimeout(() => {
+        sliderWrapper.style.transition = 'none';
+        counter = 0;
+        sliderWrapper.style.transform = `translateX(0px)`;
+      }, 500); // sync with CSS transition
+    }
+  }
+
+  setInterval(nextSlide, 3000);
+</script>
 
   <a href="register.html" class="btn">Get Started</a>
 
@@ -171,87 +198,98 @@
   setInterval(nextSlide, 3000);
 </script>
 
-  <section class="revenue">
-    <h2>Revenue</h2>
+<!-- Revenue Section -->
+<style>
+  .table-container {
+    width: 100%;
+    max-width: 400px;
+    height: 300px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-radius: 10px;
+    background: #111;
+    border: 1px solid #333;
+    padding: 5px;
+    margin: auto;
+    position: relative;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    padding: 10px;
+    text-align: left;
+    font-size: 14px;
+  }
+
+  th {
+    background: #222;
+    font-weight: bold;
+  }
+
+  tbody {
+    display: block;
+    height: 260px;
+    overflow-y: auto;
+  }
+
+  tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+</style>
+
+<section class="revenue">
+  <h2>Revenue</h2>
+  <div class="table-container">
     <table>
       <thead>
         <tr>
-          <th>username</th>
-          <th>amount</th>
-          <th>date</th>
+          <th>Username</th>
+          <th>Amount</th>
+          <th>Date</th>
         </tr>
       </thead>
       <tbody id="revenueTable"></tbody>
     </table>
-  </section>
+  </div>
+</section>
 
-  <script>
-    function generateUsername() {
-      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-      return chars[Math.floor(Math.random() * chars.length)] + "*".repeat(Math.floor(Math.random() * 5) + 3) + chars[Math.floor(Math.random() * chars.length)];
+<script>
+  function generateUsername() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    return chars[Math.floor(Math.random() * chars.length)] + "*".repeat(Math.floor(Math.random() * 5) + 3) + chars[Math.floor(Math.random() * chars.length)];
+  }
+
+  function generateAmount() {
+    return (Math.random() * (789000 - 90000) + 90000).toFixed(2);
+  }
+
+  function getCurrentDate() {
+    return new Date().toISOString().split("T")[0];
+  }
+
+  function updateTable() {
+    const tableBody = document.getElementById("revenueTable");
+    const row = `<tr>
+      <td>${generateUsername()}</td>
+      <td>${generateAmount()}</td>
+      <td>${getCurrentDate()}</td>
+    </tr>`;
+    tableBody.insertAdjacentHTML("afterbegin", row);
+
+    if (tableBody.rows.length > 10) {
+      tableBody.deleteRow(tableBody.rows.length - 1);
     }
+  }
 
-    function generateAmount() {
-      return (Math.random() * (789000 - 90000) + 90000).toFixed(2);
-    }
-
-    function getCurrentDate() {
-      return new Date().toISOString().split("T")[0];
-    }
-
-    function updateTable() {
-      const tableBody = document.getElementById("revenueTable");
-      let row = `<tr>
-          <td>${generateUsername()}</td>
-          <td>${generateAmount()}</td>
-          <td>${getCurrentDate()}</td>
-        </tr>`;
-      tableBody.insertAdjacentHTML("afterbegin", row);
-      if (tableBody.rows.length > 10) {
-        tableBody.deleteRow(10);
-      }
-    }
-
-    for (let i = 0; i < 8; i++) updateTable();
-    setInterval(updateTable, 3000);
-  </script>
-
-  <script>
-    async function fetchCryptoPrices() {
-      const apiKey = "1aec13d8-f4ef-4b88-84f1-9d49213d3987";
-      const url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?CMC_PRO_API_KEY=" + apiKey;
-
-      try {
-        const response = await fetch(url);
-        const data = await response.json();
-        if (data.status.error_code === 0) {
-          const btc = data.data.find(c => c.symbol === "BTC");
-          const eth = data.data.find(c => c.symbol === "ETH");
-          const usdt = data.data.find(c => c.symbol === "USDT");
-
-          if (btc) {
-            document.querySelector(".quotation-list li:nth-child(1) .coin-price").textContent = `$${btc.quote.USD.price.toFixed(2)}`;
-            document.querySelector(".quotation-list li:nth-child(1) .coin-change").textContent = `${btc.quote.USD.percent_change_24h.toFixed(2)}%`;
-          }
-
-          if (eth) {
-            document.querySelector(".quotation-list li:nth-child(2) .coin-price").textContent = `$${eth.quote.USD.price.toFixed(2)}`;
-            document.querySelector(".quotation-list li:nth-child(2) .coin-change").textContent = `${eth.quote.USD.percent_change_24h.toFixed(2)}%`;
-          }
-
-          if (usdt) {
-            document.querySelector(".quotation-list li:nth-child(3) .coin-price").textContent = `$${usdt.quote.USD.price.toFixed(4)}`;
-            document.querySelector(".quotation-list li:nth-child(3) .coin-change").textContent = `${usdt.quote.USD.percent_change_24h.toFixed(2)}%`;
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching crypto prices:", error);
-      }
-    }
-
-    fetchCryptoPrices();
-    setInterval(fetchCryptoPrices, 60000);
-  </script>
+  for (let i = 0; i < 8; i++) updateTable();
+  setInterval(updateTable, 3000);
+</script>
 
   <script src="script.js"></script>
 </body>
