@@ -7,48 +7,148 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; background-color: #fff; color: #333; }
-    .header { background-color: #002366; color: #fff; padding: 16px; font-size: 18px; }
-    .container { padding: 20px; }
-    .card { background-color: #f0fdf4; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-    .withdraw-section { text-align: center; margin-bottom: 10px; }
-    .withdraw-section input { font-size: 28px; text-align: center; border: none; border-bottom: 1px solid #ccc; width: 100px; outline: none; }
-    .note { font-size: 14px; color: #777; margin-top: 5px; }
-    .bank-info, .add-bank-form { margin-top: 30px; padding: 15px; border: 1px solid #eee; border-radius: 10px; }
-    .bank-info { display: flex; align-items: center; justify-content: space-between; }
-    .error { color: red; font-size: 14px; margin-top: 10px; display: none; }
-    .withdraw-btn, .confirm-btn, .add-bank-btn {
-      margin-top: 30px; padding: 15px; width: 100%; border: none; font-size: 16px; font-weight: bold;
-      border-radius: 8px; background-color: #f0f3f7; color: #bcc2cc; cursor: not-allowed;
-    }
-    .withdraw-btn.active, .confirm-btn.active {
-      background-color: #007bff; color: #fff; cursor: pointer;
-    }
-    .add-bank-btn { background-color: #007bff; color: #fff; cursor: pointer; }
-    .add-bank-form { display: flex; flex-direction: column; align-items: center; }
-    .add-bank-form input { width: 90%; margin: 8px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+ /* General Styles */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background-color: #000000;
+  color: #333;
+}
+
+/* Header */
+.header {
+  background-color: #021EFF;
+  color: #FFFFFF;
+  padding: 16px;
+  font-size: 18px;
+}
+
+/* Main Content Container */
+.container {
+  padding: 20px;
+}
+
+/* Card Component */
+.card {
+  background-color: #021EFF;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  color: #FFFFFF;
+}
+
+/* Withdraw Section */
+.withdraw-section {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.withdraw-section input {
+  font-size: 28px;
+  text-align: center;
+  border: none;
+  border-bottom: 1px solid #ccc;
+  width: 100px;
+  outline: none;
+}
+
+.note {
+  font-size: 14px;
+  color: #FFFFFF;
+  margin-top: 5px;
+}
+
+/* Bank Information Section */
+.bank-info {
+  margin-top: 30px;
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Add Bank Form */
+.add-bank-form {
+  margin-top: 30px;
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+}
+
+.add-bank-form input {
+  width: 90%;
+  margin: 8px 0;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* Buttons */
+.withdraw-btn,
+.confirm-btn,
+.add-bank-btn {
+  margin-top: 30px;
+  padding: 15px;
+  width: 100%;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 8px;
+  background-color: #f0f3f7;
+  color: #bcc2cc;
+  cursor: not-allowed;
+}
+
+.withdraw-btn.active,
+.confirm-btn.active {
+  background-color: #021EFF;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
+.add-bank-btn {
+  background-color: #021EFF;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* Error Message */
+.error {
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+  display: none;
+}
+
   </style>
 </head>
 <body>
 <div class="header">Withdraw</div>
 <div class="container">
   <div class="card">
-    <h3>Withdrawable Winnings</h3>
+    <h3>Available Balance</h3>
     <p><strong><span id="currency">₹</span><span id="balance">0</span></strong></p>
   </div>
 
   <div class="withdraw-section">
-    <label for="amount">Withdraw</label><br/>
-    <span id="input-currency" style="font-size: 24px;">₹</span>
-    <input type="number" id="amount" min="0" />
-    <div class="note">Minimum ₹60</div>
+    <label for="amount"></label><br/>
+    <span id="input-currency" style="font-size: 30px; color: #FFFFFF;">₹</span>
+<input type="number" id="amount" min="0" />
+<div class="note"></div>
+
   </div>
 
   <div id="bank-placeholder">
     <button id="add-bank-btn" class="add-bank-btn">Add Bank Account</button>
   </div>
 
-  <div id="error-message" class="error">Invalid amount. Check your balance or minimum amount.</div>
+  <div id="error-message" class="error">Invalid amount. Check your balance.</div>
   <button id="withdraw-btn" class="withdraw-btn" disabled>WITHDRAW</button>
 </div>
 
@@ -83,20 +183,16 @@
   let userBalance = 0;
   let userCurrency = '₹';
   let bankAdded = false;
-
-  const minWithdraw = 60;
+  let userId = localStorage.getItem("userId");
 
   // Fetch balance and currency
   async function fetchUserInfo() {
-    const userId = localStorage.getItem("userId"); // or however you store it
     if (!userId) return;
-
     const doc = await dbBalance.collection("users").doc(userId).get();
     if (doc.exists) {
       const data = doc.data();
       userBalance = data.balance || 0;
       userCurrency = data.currency || '₹';
-
       balanceEl.textContent = userBalance;
       currencyEls.forEach(el => el.textContent = userCurrency);
     }
@@ -104,10 +200,10 @@
 
   function validateAmount() {
     const amount = parseFloat(amountInput.value);
-    if (!bankAdded || isNaN(amount) || amount < minWithdraw || amount > userBalance) {
+    if (!bankAdded || isNaN(amount) || amount > userBalance || amount <= 0) {
       withdrawBtn.classList.remove('active');
       withdrawBtn.disabled = true;
-      errorMessage.style.display = (amount > userBalance || amount < minWithdraw) ? 'block' : 'none';
+      errorMessage.style.display = (amount > userBalance || amount <= 0) ? 'block' : 'none';
     } else {
       withdrawBtn.classList.add('active');
       withdrawBtn.disabled = false;
@@ -117,9 +213,25 @@
 
   amountInput.addEventListener('input', validateAmount);
 
-  withdrawBtn.addEventListener('click', () => {
+  withdrawBtn.addEventListener('click', async () => {
     if (!withdrawBtn.classList.contains('active')) return;
+    
+    const amount = parseFloat(amountInput.value);
+    if (!userId || isNaN(amount)) return;
+
+    // Store in Firestore (Main project)
+    await db.collection("withdrawals").add({
+      userId: userId,
+      amount: amount,
+      currency: userCurrency,
+      status: "pending",
+      createdAt: new Date().toISOString()
+    });
+
     alert('Withdrawal initiated!');
+    setTimeout(() => {
+      window.location.href = "dashboard.html";
+    }, 2000);
   });
 
   // Bank form handler
@@ -162,6 +274,7 @@
       }
 
       const bankDetails = {
+        userId,
         firstName: inputs[0].value,
         accountNumber: inputs[1].value,
         ifscCode: inputs[2].value,
@@ -188,7 +301,6 @@
     });
   });
 
-  // Initialize
   fetchUserInfo();
 </script>
 </body>
