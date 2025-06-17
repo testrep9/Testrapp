@@ -15,13 +15,15 @@
     color: #FFFFFF;
   }
 
-  /* Header */
-  .header {
-    background-color: #091DFC;
-    color: #fff;
-    padding: 16px;
-    font-size: 18px;
-  }
+ .header {
+  background-color: #091DFC;
+  color: #fff;
+  padding: 16px;
+  font-size: 18px;
+  text-align: center;
+  border: 1px solid #ccc;
+  font-weight: bold;
+}
 
   /* Container */
   .container {
@@ -127,7 +129,7 @@
 
 <div class="container">
   <div class="card">
-    <h3>Available Balance </h3>
+    <h3>Available  </h3>
     <p><strong><span id="currency-symbol">$</span><span id="balance">0</span></strong></p>
   </div>
 
@@ -135,6 +137,7 @@
     <label for="amount"></label><br/>
     <span style="font-size: 24px;" id="input-currency">$</span>
     <input type="number" id="amount" min="0" />
+     <h4>Withdrew Amount </h4>
   </div>
 
   <div id="bank-placeholder">
