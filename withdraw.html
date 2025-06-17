@@ -128,7 +128,7 @@
 <div class="container">
   <div class="card">
     <h3>Available Balance </h3>
-    <p><strong><span id="currency">$</span><span id="balance">0</span></strong></p>
+    <p><strong><span id="currency-symbol">$</span><span id="balance">0</span></strong></p>
   </div>
 
   <div class="withdraw-section">
@@ -169,7 +169,8 @@
   const withdrawBtn = document.getElementById('withdraw-btn');
   const errorMessage = document.getElementById('error-message');
   const balanceEl = document.getElementById('balance');
-  const currencyEls = [document.getElementById('currency'), document.getElementById('input-currency')];
+  const currencySymbolEl = document.getElementById('currency-symbol');
+  const inputCurrencyEl = document.getElementById('input-currency');
   const bankPlaceholder = document.getElementById('bank-placeholder');
   const addBankBtn = document.getElementById('add-bank-btn');
 
@@ -186,7 +187,8 @@
       userBalance = data.balance || 0;
       userCurrency = data.currency || '$';
       balanceEl.textContent = userBalance;
-      currencyEls.forEach(el => el.textContent = userCurrency);
+      currencySymbolEl.textContent = userCurrency;
+      inputCurrencyEl.textContent = userCurrency;
     }
   }
 
@@ -231,7 +233,6 @@
     if (!userId || isNaN(amount)) return;
 
     try {
-      // Save withdrawal to first project
       await db.collection("withdrawals").add({
         userId: userId,
         amount: amount,
@@ -240,7 +241,6 @@
         createdAt: new Date().toISOString()
       });
 
-      // Deduct from user's balance in second project
       const userRef = dbBalance.collection("users").doc(userId);
       await dbBalance.runTransaction(async (transaction) => {
         const userDoc = await transaction.get(userRef);
