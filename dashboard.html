@@ -196,7 +196,9 @@
     }
 
     document.getElementById('deposit-button').addEventListener('click', openJivoChat);
-    document.getElementById('withdraw-button').addEventListener('click', openJivoChat);
+    document.getElementById('withdraw-button').addEventListener('click', function() {
+  window.location.href = 'withdraw.html';
+});
     document.getElementById('transfer-button').addEventListener('click', openJivoChat);
 
     const serviceItems = document.querySelectorAll('.service-item');
