@@ -123,17 +123,17 @@
 </head>
 <body>
 
-<div class="header">Request A Withdraw </div>
+<div class="header">Withdraw </div>
 
 <div class="container">
   <div class="card">
     <h3>Available Balance </h3>
-    <p><strong><span id="currency">₹</span><span id="balance">0</span></strong></p>
+    <p><strong><span id="currency">$</span><span id="balance">0</span></strong></p>
   </div>
 
   <div class="withdraw-section">
     <label for="amount"></label><br/>
-    <span style="font-size: 24px;" id="input-currency">₹</span>
+    <span style="font-size: 24px;" id="input-currency">$</span>
     <input type="number" id="amount" min="0" />
   </div>
 
@@ -174,7 +174,7 @@
   const addBankBtn = document.getElementById('add-bank-btn');
 
   let userBalance = 0;
-  let userCurrency = '₹';
+  let userCurrency = '$';
   let bankAdded = false;
   let userId = localStorage.getItem("userId");
 
@@ -184,7 +184,7 @@
     if (doc.exists) {
       const data = doc.data();
       userBalance = data.balance || 0;
-      userCurrency = data.currency || '₹';
+      userCurrency = data.currency || '$';
       balanceEl.textContent = userBalance;
       currencyEls.forEach(el => el.textContent = userCurrency);
     }
