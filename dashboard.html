@@ -5,7 +5,7 @@
   <title>Account</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
-   * {
+    * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -15,7 +15,7 @@
     body {
       background-color: #000;
       color: white;
-      font-size: 3rem
+      font-size: 3rem;
     }
 
     header {
@@ -32,17 +32,13 @@
       display: flex;
       align-items: center;
       padding: 0 1rem;
-      margin-bottom: 2rem
+      margin-bottom: 2rem;
     }
 
     .welcome-content {
       display: flex;
       align-items: center;
       gap: 1rem;
-    }
-
-    .left-align {
-      justify-content: flex-start;
     }
 
     .welcome-content img {
@@ -101,6 +97,14 @@
       cursor: pointer;
     }
 
+    .balance-card button a {
+      color: inherit;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
     .welcome-message {
       background-color: #222;
       margin: 1rem;
@@ -148,7 +152,7 @@
   </style>
 </head>
 <body>
-  <header>TradeVanta Earnings Dashboard </header>
+  <header>My Wallet</header>
 
   <div class="welcome-section">
     <div class="welcome-content">
@@ -159,15 +163,12 @@
 
   <div class="balance-card">
     <div class="amount"><span id="balance-amount" class="usd">≈ 0.00</span></div>
-    <div class="label">Balance</div>
+    <div class="label">Wallet Value</div>
     <div class="buttons">
       <button id="deposit-button"><i class="fas fa-wallet"></i>Deposit</button>
       <button id="withdraw-button">
-  <a href="withdraw.html" style="display: inline-block; text-decoration: none; color: inherit;">
-    <i class="fas fa-arrow-up"></i> Withdraw
-  </a>
-</button>
-
+        <a href="withdraw.html"><i class="fas fa-arrow-up"></i>Withdraw</a>
+      </button>
       <button id="transfer-button"><i class="fas fa-exchange-alt"></i>Transfer</button>
     </div>
   </div>
@@ -185,7 +186,8 @@
       <div class="service-item"><i class="fas fa-headset"></i>Contact</div>
       <div class="service-item"><i class="fas fa-question-circle"></i>Questions</div>
       <div class="service-item"><i class="fas fa-wallet"></i>Wallet</div>
-      <div class="service-item" onclick="window.location.href='login.html';"><i class="fas fa-power-off"></i>Logout</div>
+      <div class="service-item" id="logout-button"><i class="fas fa-power-off"></i>Logout</div>
+      <div class="service-item" id="history-button"><i class="fas fa-history"></i>History</div>
     </div>
   </div>
 
@@ -196,30 +198,33 @@
     }
 
     document.getElementById('deposit-button').addEventListener('click', openJivoChat);
-    document.getElementById('withdraw-button').addEventListener('click', function() {
-  window.location.href = 'withdraw.html';
-});
     document.getElementById('transfer-button').addEventListener('click', openJivoChat);
 
+    // Open history and login pages
+    document.getElementById('logout-button').addEventListener('click', () => {
+      window.location.href = 'login.html';
+    });
+
+    document.getElementById('history-button').addEventListener('click', () => {
+      window.location.href = 'history.html';
+    });
+
+    // Optional: Make other service items open chat except Logout/History
     const serviceItems = document.querySelectorAll('.service-item');
     serviceItems.forEach(item => {
-      if (!item.querySelector('.fa-power-off')) {
+      const isLogout = item.id === 'logout-button';
+      const isHistory = item.id === 'history-button';
+      if (!isLogout && !isHistory) {
         item.addEventListener('click', openJivoChat);
       }
     });
 
     function updateBalance(balance, currency) {
       const symbol = {
-        USD: '$',
-        EUR: '€',
-        GBP: '£',
-        INR: '₹',
-        CAD: 'C$',
-        AUD: 'A$',
-        NGN: '₦',
-        JPY: '¥'
+        USD: '$', EUR: '€', GBP: '£',
+        INR: '₹', CAD: 'C$', AUD: 'A$',
+        NGN: '₦', JPY: '¥'
       }[currency] || '$';
-
       document.getElementById('balance-amount').textContent = `≈ ${symbol}${parseFloat(balance).toFixed(2)}`;
     }
   </script>
@@ -260,14 +265,14 @@
       updateDoc
     } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDtCf….xxx",
-  authDomain: "tradevanta-a3e0d.firebaseapp.com",
-  projectId: "tradevanta-a3e0d",
-  storageBucket: "tradevanta-a3e0d.appspot.com",
-  messagingSenderId: "441098922985",
-  appId: "1:441098922985:web:163878a0ef5b2054f8b978"
-};
+    const firebaseConfig = {
+      apiKey: "AIzaSyDtCf….xxx",
+      authDomain: "tradevanta-a3e0d.firebaseapp.com",
+      projectId: "tradevanta-a3e0d",
+      storageBucket: "tradevanta-a3e0d.appspot.com",
+      messagingSenderId: "441098922985",
+      appId: "1:441098922985:web:163878a0ef5b2054f8b978"
+    };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -280,7 +285,6 @@ const firebaseConfig = {
       }
 
       const userRef = doc(db, "users", userId);
-
       onSnapshot(userRef, (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
@@ -292,18 +296,6 @@ const firebaseConfig = {
       }, (error) => {
         console.error("Error listening to user document:", error);
       });
-    }
-
-    async function manuallyUpdateBalance(newBalance) {
-      const userId = localStorage.getItem("userId");
-      const userRef = doc(db, "users", userId);
-      await updateDoc(userRef, { balance: newBalance });
-    }
-
-    async function updateUserCurrency(newCurrency) {
-      const userId = localStorage.getItem("userId");
-      const userRef = doc(db, "users", userId);
-      await updateDoc(userRef, { currency: newCurrency });
     }
 
     document.addEventListener("DOMContentLoaded", listenToUserData);
