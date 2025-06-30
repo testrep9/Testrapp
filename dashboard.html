@@ -15,24 +15,25 @@
     body {
       background-color: #000;
       color: white;
-      font-size: 3rem;
+      /* Adjusted base font size for better scaling */
+      font-size: 16px; /* A good base, then use rem for relative sizing */
     }
 
     header {
       background-color: #000;
       text-align: center;
       padding: 1rem;
-      font-size: 3rem;
+      font-size: 1.8rem; /* Adjusted font size */
     }
 
     .welcome-section {
       background-color: #091dfc;
       text-align: left;
-      height: 200px;
+      height: 150px; /* Adjusted height */
       display: flex;
       align-items: center;
       padding: 0 1rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem; /* Adjusted margin */
     }
 
     .welcome-content {
@@ -42,38 +43,42 @@
     }
 
     .welcome-content img {
-      width: 100px;
-      height: 100px;
+      width: 70px; /* Adjusted size */
+      height: 70px; /* Adjusted size */
+      border-radius: 50%; /* Make it circular */
+      object-fit: cover;
     }
 
     .welcome-content h2 {
-      font-size: 3rem;
+      font-size: 2.2rem; /* Adjusted font size */
       color: white;
       margin: 0;
     }
 
     .balance-card {
       background-color: #222;
-      margin: -2rem 1rem 1rem;
+      margin: -2rem 1rem 1rem; /* Adjust negative margin if needed based on header/welcome section layout */
       padding: 1.5rem;
       border-radius: 10px;
       text-align: center;
     }
 
     .balance-card .amount {
-      font-size: 4.3rem;
+      font-size: 3.5rem; /* Adjusted font size */
       color: orange;
       margin-bottom: 0.3rem;
     }
 
-    .balance-card .usd {
+    /* Removed .usd class as currency will be dynamic */
+    /* .balance-card .usd {
       font-size: 2.9rem;
       color: #aaa;
-    }
+    } */
 
     .balance-card .label {
       margin: 0.5rem 0 1rem;
       color: #aaa;
+      font-size: 1.1rem; /* Adjusted font size */
     }
 
     .balance-card .buttons {
@@ -88,13 +93,17 @@
       border: none;
       border-radius: 6px;
       padding: 0.6rem 1.2rem;
-      font-size: 1.7rem;
+      font-size: 1rem; /* Adjusted font size */
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
       cursor: pointer;
+      transition: background-color 0.3s ease; /* Added transition */
+    }
+    .balance-card button:hover {
+        background-color: #001bff; /* Darker blue on hover */
     }
 
     .balance-card button a {
@@ -111,6 +120,7 @@
       padding: 1rem;
       border-radius: 10px;
       text-align: center;
+      font-size: 1.1rem; /* Adjusted font size */
     }
 
     .welcome-message i {
@@ -124,12 +134,12 @@
 
     .services h3 {
       margin-bottom: 1rem;
-      font-size: 5rem;
+      font-size: 1.8rem; /* Adjusted font size */
     }
 
     .service-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Responsive grid */
       gap: 1rem;
     }
 
@@ -138,13 +148,17 @@
       border-radius: 8px;
       padding: 0.8rem 0;
       text-align: center;
-      font-size: 2rem;
+      font-size: 1rem; /* Adjusted font size */
       color: white;
       cursor: pointer;
+      transition: background-color 0.3s ease; /* Added transition */
+    }
+    .service-item:hover {
+        background-color: #333; /* Darker grey on hover */
     }
 
     .service-item i {
-      font-size: 2rem;
+      font-size: 1.5rem; /* Adjusted font size */
       display: block;
       margin-bottom: 0.3rem;
       color: #1a2cff;
@@ -156,13 +170,13 @@
 
   <div class="welcome-section">
     <div class="welcome-content">
-      <img src="https://i.postimg.cc/HL8WxBF2/IMG-2671.png?v=026" alt="Tether Logo" />
+      <img src="https://i.postimg.cc/HL8WxBF2/IMG-2671.png?v=026" alt="Profile Picture" />
       <h2 id="welcome-username">Welcome</h2>
     </div>
   </div>
 
   <div class="balance-card">
-    <div class="amount"><span id="balance-amount" class="usd">≈ 0.00</span></div>
+    <div class="amount"><span id="balance-amount">≈ 0.00</span></div>
     <div class="label">Wallet Value</div>
     <div class="buttons">
       <button id="deposit-button"><i class="fas fa-wallet"></i>Deposit</button>
@@ -191,45 +205,6 @@
     </div>
   </div>
 
-  <!-- JivoChat Script -->
-  <script>
-    function openJivoChat() {
-      if (window.jivo_api) jivo_api.open();
-    }
-
-    document.getElementById('deposit-button').addEventListener('click', openJivoChat);
-    document.getElementById('transfer-button').addEventListener('click', openJivoChat);
-
-    // Open history and login pages
-    document.getElementById('logout-button').addEventListener('click', () => {
-      window.location.href = 'login.html';
-    });
-
-    document.getElementById('history-button').addEventListener('click', () => {
-      window.location.href = 'history.html';
-    });
-
-    // Optional: Make other service items open chat except Logout/History
-    const serviceItems = document.querySelectorAll('.service-item');
-    serviceItems.forEach(item => {
-      const isLogout = item.id === 'logout-button';
-      const isHistory = item.id === 'history-button';
-      if (!isLogout && !isHistory) {
-        item.addEventListener('click', openJivoChat);
-      }
-    });
-
-    function updateBalance(balance, currency) {
-      const symbol = {
-        USD: '$', EUR: '€', GBP: '£',
-        INR: '₹', CAD: 'C$', AUD: 'A$',
-        NGN: '₦', JPY: '¥'
-      }[currency] || '$';
-      document.getElementById('balance-amount').textContent = `≈ ${symbol}${parseFloat(balance).toFixed(2)}`;
-    }
-  </script>
-
-  <!-- Jivochat Widget -->
   <script>
     (function () {
       var widget_id = 'wV6zTzxS5q';
@@ -255,18 +230,13 @@
     })();
   </script>
 
-  <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import {
-      getFirestore,
-      doc,
-      onSnapshot,
-      updateDoc
-    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"; // Import getAuth and signOut
 
     const firebaseConfig = {
-      apiKey: "AIzaSyDtCf….xxx",
+      apiKey: "AIzaSyDtCfsMkc_Z_9ZeF0TEHTDFBzLlkU-egSc", // Make sure this is your actual API Key
       authDomain: "tradevanta-a3e0d.firebaseapp.com",
       projectId: "tradevanta-a3e0d",
       storageBucket: "tradevanta-a3e0d.appspot.com",
@@ -276,12 +246,28 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app); // Get auth instance
+
+    // Currency map moved here to be accessible within the module scope
+    const currencySymbols = {
+      USD: '$', EUR: '€', GBP: '£',
+      INR: '₹', CAD: 'C$', AUD: 'A$',
+      NGN: '₦', JPY: '¥', // Added NGN and JPY as per common use
+      // Add more as needed
+    };
+
+    function updateBalanceDisplay(balance, currencyCode) {
+      const symbol = currencySymbols[currencyCode] || '$'; // Fallback to '$' if currency code not found
+      document.getElementById('balance-amount').textContent = `≈ ${symbol}${parseFloat(balance).toFixed(2)}`;
+    }
 
     function listenToUserData() {
-      const userId = localStorage.getItem("userId");
+      const userId = localStorage.getItem("userId"); // <--- THIS IS THE CRITICAL LINE
       if (!userId) {
-        console.error("User ID not found in localStorage.");
-        return;
+        console.error("User ID not found in localStorage. Redirecting to login.");
+        // If user ID is missing, redirect to login page
+        window.location.href = "login.html"; // Or your main authentication page
+        return; // Stop execution
       }
 
       const userRef = doc(db, "users", userId);
@@ -289,16 +275,67 @@
         if (docSnap.exists()) {
           const data = docSnap.data();
           document.getElementById("welcome-username").textContent = `Welcome, ${data.username || 'User'}`;
-          updateBalance(data.balance || 0, data.currency || 'USD');
+          updateBalanceDisplay(data.balance || 0, data.currency || 'USD'); // Pass currency code
         } else {
-          console.log("User document does not exist.");
+          console.log("User document does not exist in Firestore. Logging out.");
+          // If user document is somehow deleted, log out and redirect
+          signOut(auth).then(() => {
+            localStorage.clear();
+            window.location.href = "login.html";
+          }).catch((error) => {
+            console.error("Error signing out after missing doc:", error);
+            localStorage.clear();
+            window.location.href = "login.html";
+          });
         }
       }, (error) => {
         console.error("Error listening to user document:", error);
+        // Optionally, handle specific errors (e.g., permission denied)
+        alert("Failed to load user data. Please try again or re-login.");
+        signOut(auth).then(() => {
+          localStorage.clear();
+          window.location.href = "login.html";
+        });
       });
     }
 
-    document.addEventListener("DOMContentLoaded", listenToUserData);
+    document.addEventListener("DOMContentLoaded", () => {
+      listenToUserData();
+
+      // JivoChat listeners
+      function openJivoChat() {
+        if (window.jivo_api) jivo_api.open();
+      }
+      document.getElementById('deposit-button').addEventListener('click', openJivoChat);
+      document.getElementById('transfer-button').addEventListener('click', openJivoChat);
+
+      const serviceItems = document.querySelectorAll('.service-item');
+      serviceItems.forEach(item => {
+        const isLogout = item.id === 'logout-button';
+        const isHistory = item.id === 'history-button';
+        if (!isLogout && !isHistory) {
+          item.addEventListener('click', openJivoChat);
+        }
+      });
+
+      // Logout Functionality (using Firebase signOut)
+      document.getElementById('logout-button').addEventListener('click', async () => {
+        try {
+          await signOut(auth); // Sign out from Firebase
+          localStorage.clear(); // Clear all data from localStorage
+          alert("You have been successfully logged out.");
+          window.location.href = 'login.html'; // Redirect to login page
+        } catch (error) {
+          console.error("Logout Error:", error);
+          alert("Failed to log out: " + error.message);
+        }
+      });
+
+      // Navigation for History button
+      document.getElementById('history-button').addEventListener('click', () => {
+        window.location.href = 'history.html';
+      });
+    });
   </script>
 </body>
 </html>
