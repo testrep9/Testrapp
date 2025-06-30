@@ -157,14 +157,13 @@
     const form = document.getElementById("authForm");
     const signupOnly = document.querySelectorAll(".signup-only");
     const submitBtn = document.getElementById("submitBtn");
-    const logoutBtn = document.getElementById("logoutBtn"); // Assuming you have a logout button elsewhere
+    const logoutBtn = document.getElementById("logoutBtn");
 
     loginBtn.addEventListener("click", () => {
       loginBtn.classList.add("active");
       signupBtn.classList.remove("active");
       signupOnly.forEach(el => el.style.display = "none");
       submitBtn.textContent = "Login";
-      // Ensure logout button is hidden on login/signup view
       logoutBtn.style.display = "none"; 
     });
 
@@ -173,7 +172,6 @@
       loginBtn.classList.remove("active");
       signupOnly.forEach(el => el.style.display = "block");
       submitBtn.textContent = "Signup";
-      // Ensure logout button is hidden on login/signup view
       logoutBtn.style.display = "none";
     });
 
@@ -198,35 +196,34 @@
           return alert("Please complete all signup fields.");
         }
 
-        // Password strength validation
         if (!/^(?=.*[a-zA-Z])(?=.*\d).{6,}$/.test(password)) {
           return alert("Password must be at least 6 characters and include at least one letter and one number.");
         }
 
         try {
-          // Create user with email and password
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           const uid = userCredential.user.uid;
 
-          // Store additional user details in Firestore
           const userData = {
             username,
             fullname,
             email,
             country,
-            currency, // Storing currency code (e.g., "USD")
+            currency,
             balance: 0,
-            registrationDate: new Date().toISOString() // Added registration date
+            registrationDate: new Date().toISOString()
           };
 
           await setDoc(doc(db, "users", uid), userData);
 
-          // Store essential data in localStorage for immediate use
+          // Store in localStorage
+          localStorage.setItem("uid", uid);               // ✅ Store UID
           localStorage.setItem("username", username);
-          localStorage.setItem("balance", 0); // Store initial balance as string
-          
+          localStorage.setItem("balance", 0);
+          localStorage.setItem("currency", currency);
+
           alert("Registration successful! Redirecting to dashboard...");
-          window.location.href = "dashboard.html"; // Redirect to dashboard after signup
+          window.location.href = "dashboard.html";
         } catch (error) {
           console.error("Signup Error:", error);
           let errorMessage = "An error occurred during signup.";
@@ -247,24 +244,24 @@
           const userCredential = await signInWithEmailAndPassword(auth, email, password);
           const uid = userCredential.user.uid;
 
-          // Retrieve user data from Firestore
           const userDocRef = doc(db, "users", uid);
           const docSnap = await getDoc(userDocRef);
 
           if (!docSnap.exists()) {
             alert("User data not found in Firestore. Please contact support.");
-            // Optionally sign out the user if their data isn't found
             await signOut(auth);
             localStorage.clear();
             return;
           }
 
           const userData = docSnap.data();
+          localStorage.setItem("uid", uid);               // ✅ Store UID
           localStorage.setItem("username", userData.username);
-          localStorage.setItem("balance", userData.balance); // Store balance from Firestore
-          
+          localStorage.setItem("balance", userData.balance);
+          localStorage.setItem("currency", userData.currency);
+
           alert("Login successful! Redirecting to dashboard...");
-          window.location.href = "dashboard.html"; // Redirect to dashboard after login
+          window.location.href = "dashboard.html";
         } catch (error) {
           console.error("Login Error:", error);
           let errorMessage = "An error occurred during login.";
@@ -280,33 +277,30 @@
       }
     });
 
-    // Logout functionality (if this button is visible elsewhere or managed by JS)
     logoutBtn.addEventListener("click", async () => {
       try {
         await signOut(auth);
-        localStorage.clear(); // Clear all stored user data
+        localStorage.clear();
         alert("Logged out successfully!");
-        window.location.href = "index.html"; // Redirect to a landing page or login page
+        window.location.href = "index.html";
       } catch (error) {
         console.error("Logout Error:", error);
         alert("Failed to log out: " + error.message);
       }
     });
 
-    // Populate dropdowns
     const countries = [
-      "United States", "United Kingdom", "Canada", "India", "Australia", "Germany", "France", "China", "South Africa", "Nigeria" // Added Nigeria
+      "United States", "United Kingdom", "Canada", "India", "Australia", "Germany", "France", "China", "South Africa", "Nigeria"
     ];
 
     const currencyMap = {
       "USD": "$", "EUR": "€", "GBP": "£", "INR": "₹",
-      "AUD": "A$", "CAD": "C$", "ETH": "Ξ", "USDT": "₮", "NGN": "₦" // Added NGN
+      "AUD": "A$", "CAD": "C$", "ETH": "Ξ", "USDT": "₮", "NGN": "₦"
     };
 
     const countrySelect = document.getElementById("country");
     const currencySelect = document.getElementById("currency");
 
-    // Clear existing options before populating (useful if called multiple times)
     countrySelect.innerHTML = '<option value="">Select Country</option>';
     currencySelect.innerHTML = '<option value="">Select Currency</option>';
 
@@ -319,12 +313,12 @@
 
     Object.entries(currencyMap).forEach(([code, symbol]) => {
       const opt = document.createElement("option");
-      opt.value = code; // Store the currency code (e.g., "USD")
-      opt.textContent = `${symbol} (${code})`; // Display symbol and code (e.g., "$ (USD)")
+      opt.value = code;
+      opt.textContent = `${symbol} (${code})`;
       currencySelect.appendChild(opt);
     });
 
-    // Initial state: Default to signup view on page load
+    // Show signup view by default
     signupBtn.click();
   </script>
 
