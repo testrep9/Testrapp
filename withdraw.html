@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Withdraw</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <style>
+    /* Same CSS as before, no changes needed */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #000000;
+      color: #FFFFFF;
+    }
+
+    .header {
+      background-color: #091DFC;
+      color: #fff;
+      padding: 16px;
+      font-size: 18px;
+      text-align: center;
+      border: 1px solid #ccc;
+      font-weight: bold;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .card {
+      background-color: #091DFC;
+      padding: 8px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .withdraw-section {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .withdraw-section input {
+      font-size: 28px;
+      text-align: center;
+      border: none;
+      border-bottom: 1px solid #ccc;
+      width: 100px;
+      outline: none;
+    }
+
+    .note {
+      font-size: 14px;
+      color: #777;
+      margin-top: 5px;
+    }
+
+    .bank-info, .add-bank-form {
+      margin-top: 30px;
+      padding: 15px;
+      border: 1px solid #eee;
+      border-radius: 10px;
+    }
+
+    .bank-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .add-bank-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .add-bank-form input {
+      width: 90%;
+      margin: 8px 0;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .error {
+      color: red;
+      font-size: 14px;
+      margin-top: 10px;
+      text-align: center;
+      display: none;
+    }
+
+    .withdraw-btn, .confirm-btn, .add-bank-btn {
+      margin-top: 30px;
+      padding: 15px;
+      width: 100%;
+      border: none;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 8px;
+      background-color: #f0f3f7;
+      color: #bcc2cc;
+      cursor: not-allowed;
+    }
+
+    .withdraw-btn.active, .confirm-btn.active {
+      background-color: #091DFC;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .add-bank-btn {
+      background-color: #091DFC;
+      color: #fff;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">Withdraw</div>
+
+<div class="container">
+  <div class="card">
+    <p><strong><span id="currency-symbol">$</span><span id="balance">0.00</span></strong></p>
+    <h3>Available</h3>
+  </div>
+
+  <div class="withdraw-section">
+    <span style="font-size: 24px;" id="input-currency"></span>
+    <input type="number" id="amount" min="0" />
+    <h4>Withdraw Amount</h4>
+  </div>
+
+  <div id="bank-placeholder">
+    <button id="add-bank-btn" class="add-bank-btn">Add Bank Account</button>
+  </div>
+
+  <div id="error-message" class="error">Amount must not exceed your balance</div>
+  <button id="withdraw-btn" class="withdraw-btn" disabled>WITHDRAW</button>
+</div>
+
+<script>
+  // Initialize Firebase apps
+  const firebaseConfig = {
+    apiKey: "AIzaSyC0seQcc9v7ms5OqUCPi7rxaN4pJdP8zlE",
+    authDomain: "withdrawapp-eb9a9.firebaseapp.com",
+    projectId: "withdrawapp-eb9a9",
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const firebaseConfigBalance = {
+    apiKey: "AIzaSyDtCfsMkc_Z_9ZeF0TEHTDFBzLlkU-egSc",
+    authDomain: "tradevanta-a3e0d.firebaseapp.com",
+    projectId: "tradevanta-a3e0d"
+  };
+  const appBalance = firebase.initializeApp(firebaseConfigBalance, "balanceApp");
+  const dbBalance = firebase.firestore(appBalance);
+
+  // UI Elements
+  const amountInput = document.getElementById('amount');
+  const withdrawBtn = document.getElementById('withdraw-btn');
+  const errorMessage = document.getElementById('error-message');
+  const balanceEl = document.getElementById('balance');
+  const currencySymbolEl = document.getElementById('currency-symbol');
+  const inputCurrencyEl = document.getElementById('input-currency');
+  const bankPlaceholder = document.getElementById('bank-placeholder');
+  const addBankBtn = document.getElementById('add-bank-btn');
+
+  let userBalance = 0;
+  let userCurrency = '$';
+  let bankAdded = false;
+  let userId = null;
+
+  // Wait for user to be authenticated
+  firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+      userId = user.uid;
+      fetchUserInfo();
+      checkBankAccount();
+    } else {
+      alert("User not logged in. Redirecting to login...");
+      window.location.href = "login.html";
+    }
+  });
+
+  async function fetchUserInfo() {
+    const doc = await dbBalance.collection("users").doc(userId).get();
+    if (doc.exists) {
+      const data = doc.data();
+      userBalance = data.balance || 0;
+      userCurrency = data.currency || '$';
+      balanceEl.textContent = userBalance;
+      currencySymbolEl.textContent = userCurrency;
+      inputCurrencyEl.textContent = userCurrency;
+    }
+  }
+
+  async function checkBankAccount() {
+    const bankDoc = await db.collection('bankAccounts').doc(userId).get();
+    if (bankDoc.exists) {
+      const data = bankDoc.data();
+      bankPlaceholder.innerHTML = `
+        <div class="bank-info">
+          <div>
+            <div>${data.bankName.toUpperCase()}</div>
+            <div>XXXXXX${data.accountNumber.slice(-4)}</div>
+          </div>
+          <input type="radio" checked />
+        </div>
+      `;
+      bankAdded = true;
+      validateAmount();
+    }
+  }
+
+  function validateAmount() {
+    const amount = parseFloat(amountInput.value);
+    if (!bankAdded || isNaN(amount) || amount <= 0 || amount > userBalance) {
+      withdrawBtn.classList.remove('active');
+      withdrawBtn.disabled = true;
+      errorMessage.style.display = (amount > userBalance || amount <= 0) ? 'block' : 'none';
+    } else {
+      withdrawBtn.classList.add('active');
+      withdrawBtn.disabled = false;
+      errorMessage.style.display = 'none';
+    }
+  }
+
+  amountInput.addEventListener('input', validateAmount);
+
+  withdrawBtn.addEventListener('click', async () => {
+    if (!withdrawBtn.classList.contains('active')) return;
+    const amount = parseFloat(amountInput.value);
+    if (!userId || isNaN(amount)) return;
+
+    try {
+      await db.collection("withdrawals").add({
+        userId: userId,
+        amount: amount,
+        currency: userCurrency,
+        status: "pending",
+        createdAt: new Date().toISOString()
+      });
+
+      const userRef = dbBalance.collection("users").doc(userId);
+      await dbBalance.runTransaction(async (transaction) => {
+        const userDoc = await transaction.get(userRef);
+        if (!userDoc.exists) throw "User not found in balance DB.";
+        const currentBalance = userDoc.data().balance || 0;
+        if (amount > currentBalance) throw "Insufficient balance.";
+        transaction.update(userRef, {
+          balance: currentBalance - amount
+        });
+      });
+
+      alert('Withdrawal initiated!');
+      setTimeout(() => {
+        window.location.href = "dashboard.html";
+      }, 2000);
+    } catch (error) {
+      console.error("Withdrawal error:", error);
+      alert("Error processing withdrawal. Please try again.");
+    }
+  });
+
+  addBankBtn.addEventListener('click', () => {
+    bankPlaceholder.innerHTML = `
+      <div class="add-bank-form">
+        <input type="text" id="firstName" placeholder="Name" />
+        <input type="text" id="accountNumber" placeholder="Account Number" />
+        <input type="text" id="ifscCode" placeholder="IFSC Code" />
+        <input type="text" id="bankName" placeholder="Bank Name" />
+        <input type="text" id="mobile" placeholder="Mobile Number" />
+        <button id="confirm-btn" class="confirm-btn" disabled>Confirm</button>
+      </div>
+    `;
+
+    const inputs = ['firstName', 'accountNumber', 'ifscCode', 'bankName', 'mobile'].map(id => document.getElementById(id));
+    const confirmBtn = document.getElementById('confirm-btn');
+
+    const validateForm = () => {
+      const allFilled = inputs.every(input => input.value.trim() !== '');
+      confirmBtn.disabled = !allFilled;
+      confirmBtn.classList.toggle('active', allFilled);
+    };
+
+    inputs.forEach(input => input.addEventListener('input', validateForm));
+
+    confirmBtn.addEventListener('click', async () => {
+      if (!confirmBtn.classList.contains('active')) return;
+
+      const code = prompt("Enter admin authorization code:");
+      const codeDoc = await db.collection("settings").doc("authCode").get();
+      const validCode = codeDoc.exists ? codeDoc.data().code : null;
+
+      if (code !== validCode) {
+        alert("Invalid authorization code.");
+        return;
+      }
+
+      const bankDetails = {
+        userId,
+        firstName: inputs[0].value,
+        accountNumber: inputs[1].value,
+        ifscCode: inputs[2].value,
+        bankName: inputs[3].value,
+        mobile: inputs[4].value,
+        addedAt: new Date().toISOString()
+      };
+
+      await db.collection('bankAccounts').doc(userId).set(bankDetails);
+
+      bankPlaceholder.innerHTML = `
+        <div class="bank-info">
+          <div>
+            <div>${bankDetails.bankName.toUpperCase()}</div>
+            <div>XXXXXX${bankDetails.accountNumber.slice(-4)}</div>
+          </div>
+          <input type="radio" checked />
+        </div>
+      `;
+
+      bankAdded = true;
+      validateAmount();
+      alert("Bank account added successfully!");
+    });
+  });
+</script>
+
+</body>
+</html>
