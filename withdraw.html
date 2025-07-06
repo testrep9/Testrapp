@@ -6,138 +6,132 @@
   <title>Withdraw</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<style>
-  /* Base Styles */
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    background-color: #000000;
-    color: #FFFFFF;
-  }
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <style>
+    /* Same CSS as before, no changes needed */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #000000;
+      color: #FFFFFF;
+    }
 
- .header {
-  background-color: #091DFC;
-  color: #fff;
-  padding: 16px;
-  font-size: 18px;
-  text-align: center;
-  border: 1px solid #ccc;
-  font-weight: bold;
-}
+    .header {
+      background-color: #091DFC;
+      color: #fff;
+      padding: 16px;
+      font-size: 18px;
+      text-align: center;
+      border: 1px solid #ccc;
+      font-weight: bold;
+    }
 
-  /* Container */
-  .container {
-    padding: 20px;
-  }
+    .container {
+      padding: 20px;
+    }
 
-  /* Card */
-  .card {
-    background-color: #091DFC;
-    padding: 8px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-  }
+    .card {
+      background-color: #091DFC;
+      padding: 8px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
 
-  /* Withdraw Section */
-  .withdraw-section {
-    text-align: center;
-    margin-bottom: 10px;
-  }
+    .withdraw-section {
+      text-align: center;
+      margin-bottom: 10px;
+    }
 
-  .withdraw-section input {
-    font-size: 28px;
-    text-align: center;
-    border: none;
-    border-bottom: 1px solid #ccc;
-    width: 100px;
-    outline: none;
-  }
+    .withdraw-section input {
+      font-size: 28px;
+      text-align: center;
+      border: none;
+      border-bottom: 1px solid #ccc;
+      width: 100px;
+      outline: none;
+    }
 
-  .note {
-    font-size: 14px;
-    color: #777;
-    margin-top: 5px;
-  }
+    .note {
+      font-size: 14px;
+      color: #777;
+      margin-top: 5px;
+    }
 
-  /* Bank Info & Form */
-  .bank-info, .add-bank-form {
-    margin-top: 30px;
-    padding: 15px;
-    border: 1px solid #eee;
-    border-radius: 10px;
-  }
+    .bank-info, .add-bank-form {
+      margin-top: 30px;
+      padding: 15px;
+      border: 1px solid #eee;
+      border-radius: 10px;
+    }
 
-  .bank-info {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
+    .bank-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-  .add-bank-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+    .add-bank-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-  .add-bank-form input {
-    width: 90%;
-    margin: 8px 0;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
+    .add-bank-form input {
+      width: 90%;
+      margin: 8px 0;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
 
-  /* Error Message */
-  .error {
-    color: red;
-    font-size: 14px;
-    margin-top: 10px;
-    text-align: center;
-    display: none;
-  }
+    .error {
+      color: red;
+      font-size: 14px;
+      margin-top: 10px;
+      text-align: center;
+      display: none;
+    }
 
-  /* Buttons */
-  .withdraw-btn, .confirm-btn, .add-bank-btn {
-    margin-top: 30px;
-    padding: 15px;
-    width: 100%;
-    border: none;
-    font-size: 16px;
-    font-weight: bold;
-    border-radius: 8px;
-    background-color: #f0f3f7;
-    color: #bcc2cc;
-    cursor: not-allowed;
-  }
+    .withdraw-btn, .confirm-btn, .add-bank-btn {
+      margin-top: 30px;
+      padding: 15px;
+      width: 100%;
+      border: none;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 8px;
+      background-color: #f0f3f7;
+      color: #bcc2cc;
+      cursor: not-allowed;
+    }
 
-  .withdraw-btn.active, .confirm-btn.active {
-    background-color: #091DFC;
-    color: #fff;
-    cursor: pointer;
-  }
+    .withdraw-btn.active, .confirm-btn.active {
+      background-color: #091DFC;
+      color: #fff;
+      cursor: pointer;
+    }
 
-  .add-bank-btn {
-    background-color: #091DFC;
-    color: #fff;
-    cursor: pointer;
-  }
-</style>
+    .add-bank-btn {
+      background-color: #091DFC;
+      color: #fff;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
 
-<div class="header">Withdraw </div>
+<div class="header">Withdraw</div>
 
 <div class="container">
   <div class="card">
-    <p><strong><span id="currency-symbol">$</span><span id="balance">0.00 </span></strong></p>           
-     <h3>Available  </h3>
+    <p><strong><span id="currency-symbol">$</span><span id="balance">0.00</span></strong></p>
+    <h3>Available</h3>
   </div>
 
   <div class="withdraw-section">
-    <label for="amount"></label><br/>
     <span style="font-size: 24px;" id="input-currency"></span>
     <input type="number" id="amount" min="0" />
-     <h4>Withdrew Amount </h4>
+    <h4>Withdraw Amount</h4>
   </div>
 
   <div id="bank-placeholder">
@@ -149,13 +143,11 @@
 </div>
 
 <script>
+  // Initialize Firebase apps
   const firebaseConfig = {
     apiKey: "AIzaSyC0seQcc9v7ms5OqUCPi7rxaN4pJdP8zlE",
     authDomain: "withdrawapp-eb9a9.firebaseapp.com",
     projectId: "withdrawapp-eb9a9",
-    storageBucket: "withdrawapp-eb9a9.appspot.com",
-    messagingSenderId: "482698678271",
-    appId: "1:482698678271:web:669173ee71c85130b621ca"
   };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
@@ -168,6 +160,7 @@
   const appBalance = firebase.initializeApp(firebaseConfigBalance, "balanceApp");
   const dbBalance = firebase.firestore(appBalance);
 
+  // UI Elements
   const amountInput = document.getElementById('amount');
   const withdrawBtn = document.getElementById('withdraw-btn');
   const errorMessage = document.getElementById('error-message');
@@ -180,10 +173,21 @@
   let userBalance = 0;
   let userCurrency = '$';
   let bankAdded = false;
-  let userId = localStorage.getItem("userId");
+  let userId = null;
+
+  // Wait for user to be authenticated
+  firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+      userId = user.uid;
+      fetchUserInfo();
+      checkBankAccount();
+    } else {
+      alert("User not logged in. Redirecting to login...");
+      window.location.href = "login.html";
+    }
+  });
 
   async function fetchUserInfo() {
-    if (!userId) return;
     const doc = await dbBalance.collection("users").doc(userId).get();
     if (doc.exists) {
       const data = doc.data();
@@ -196,7 +200,6 @@
   }
 
   async function checkBankAccount() {
-    if (!userId) return;
     const bankDoc = await db.collection('bankAccounts').doc(userId).get();
     if (bankDoc.exists) {
       const data = bankDoc.data();
@@ -231,7 +234,6 @@
 
   withdrawBtn.addEventListener('click', async () => {
     if (!withdrawBtn.classList.contains('active')) return;
-
     const amount = parseFloat(amountInput.value);
     if (!userId || isNaN(amount)) return;
 
@@ -327,9 +329,6 @@
       alert("Bank account added successfully!");
     });
   });
-
-  fetchUserInfo();
-  checkBankAccount();
 </script>
 
 </body>
