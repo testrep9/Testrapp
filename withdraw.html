@@ -150,12 +150,13 @@
   <button id="withdraw-btn" class="withdraw-btn" disabled>WITHDRAW</button>
 </div>
 
-<script type="module">
-  // Import Firebase modules
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc, runTransaction, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+<!-- unchanged <head> and <style> sections -->
+<!-- ... -->
 
-  // Your ONE and ONLY Firebase configuration for tradevanta-a3e0d
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+  import { getFirestore, doc, getDoc, setDoc, runTransaction, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
   const firebaseConfig = {
     apiKey: "AIzaSyDtCfsMkc_Z_9ZeF0TEHTDFBzLlkU-egSc",
     authDomain: "tradevanta-a3e0d.firebaseapp.com",
@@ -165,43 +166,38 @@
     appId: "1:441098922985:web:163878a0ef5b2054f8b978"
   };
 
-  // Initialize Firebase app
   const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app); // Get Firestore instance from the single app
+  const db = getFirestore(app);
 
-  // DOM elements
   const amountInput = document.getElementById('amount');
   const withdrawBtn = document.getElementById('withdraw-btn');
   const errorMessage = document.getElementById('error-message');
   const balanceEl = document.getElementById('balance');
   const currencySymbolEl = document.getElementById('currency-symbol');
-  const inputCurrencySymbolEl = document.getElementById('input-currency-symbol'); // Changed ID for clarity
+  const inputCurrencySymbolEl = document.getElementById('input-currency-symbol');
   const bankPlaceholder = document.getElementById('bank-placeholder');
   const addBankBtn = document.getElementById('add-bank-btn');
 
   let userBalance = 0;
-  let userCurrencyCode = 'USD'; // Store currency code like 'USD', 'NGN'
-  let userCurrencySymbol = '$'; // Store the actual symbol like '$', '₦'
+  let userCurrencyCode = 'USD';
+  let userCurrencySymbol = '$';
   let bankAdded = false;
 
-  // Retrieve user ID from localStorage (using 'uid' as set by your login/signup)
-  const userId = localStorage.getItem("uid"); // Corrected to 'uid'
+  const userId = localStorage.getItem("uid");
 
-  // Helper to map currency codes to symbols
   const currencyMap = {
     "USD": "$", "EUR": "€", "GBP": "£", "INR": "₹",
     "AUD": "A$", "CAD": "C$", "ETH": "Ξ", "USDT": "₮", "NGN": "₦", "JPY": "¥"
   };
 
   function getCurrencySymbol(code) {
-    return currencyMap[code] || '$'; // Default to '$' if not found
+    return currencyMap[code] || '$';
   }
 
   async function fetchUserInfo() {
     if (!userId) {
-      console.error("User ID not found in localStorage. Redirecting to login.");
       alert("Please log in to access the withdrawal page.");
-      window.location.href = "login.html"; // Redirect to login if no userId
+      window.location.href = "login.html";
       return;
     }
 
@@ -214,20 +210,16 @@
       userCurrencyCode = data.currency || 'USD';
       userCurrencySymbol = getCurrencySymbol(userCurrencyCode);
 
-      balanceEl.textContent = parseFloat(userBalance).toFixed(2); // Format balance to 2 decimal places
+      balanceEl.textContent = parseFloat(userBalance).toFixed(2);
       currencySymbolEl.textContent = userCurrencySymbol;
       inputCurrencySymbolEl.textContent = userCurrencySymbol;
     } else {
-      console.log("User document not found for withdrawal:", userId);
-      alert("User data not found. Please contact support.");
-      // Optionally redirect or log out the user
-      // window.location.href = "dashboard.html";
+      alert("User data not found.");
     }
   }
 
   async function checkBankAccount() {
-    if (!userId) return; // Should already be handled by fetchUserInfo but good to have
-    const bankDocRef = doc(db, 'bankAccounts', userId); // Bank accounts in the same project
+    const bankDocRef = doc(db, 'bankAccounts', userId);
     const bankDoc = await getDoc(bankDocRef);
 
     if (bankDoc.exists()) {
@@ -235,13 +227,14 @@
       bankPlaceholder.innerHTML = `
         <div class="bank-info">
           <div>
-            <div>${data.bankName ? data.bankName.toUpperCase() : 'Unknown Bank'}</div>
-            <div>****${data.accountNumber ? data.accountNumber.slice(-4) : '****'}</div>
+            <div>${data.bankName?.toUpperCase() || 'Bank'}</div>
+            <div>****${data.accountNumber?.slice(-4) || '****'}</div>
           </div>
-          <input type="radio" checked disabled /> </div>
+          <input type="radio" checked disabled />
+        </div>
       `;
       bankAdded = true;
-      validateAmount(); // Re-validate if a bank account is found
+      validateAmount();
     }
   }
 
@@ -253,18 +246,11 @@
     if (!bankAdded || !isValidAmount || !hasSufficientBalance) {
       withdrawBtn.classList.remove('active');
       withdrawBtn.disabled = true;
-      if (!bankAdded) {
-        errorMessage.textContent = 'Please add a bank account first.';
-        errorMessage.style.display = 'block';
-      } else if (!isValidAmount) {
-        errorMessage.textContent = 'Please enter a valid amount greater than 0.';
-        errorMessage.style.display = 'block';
-      } else if (!hasSufficientBalance) {
-        errorMessage.textContent = 'Amount must not exceed your available balance.';
-        errorMessage.style.display = 'block';
-      } else {
-        errorMessage.style.display = 'none'; // Hide if valid so far but not active
-      }
+      errorMessage.textContent =
+        !bankAdded ? 'Please add a bank account first.' :
+        !isValidAmount ? 'Please enter a valid amount.' :
+        'Amount exceeds your balance.';
+      errorMessage.style.display = 'block';
     } else {
       withdrawBtn.classList.add('active');
       withdrawBtn.disabled = false;
@@ -275,62 +261,53 @@
   amountInput.addEventListener('input', validateAmount);
 
   withdrawBtn.addEventListener('click', async () => {
-    if (!withdrawBtn.classList.contains('active')) return; // Prevent clicks if not active
+    if (!withdrawBtn.classList.contains('active')) return;
 
     const amount = parseFloat(amountInput.value);
-    if (!userId || isNaN(amount) || amount <= 0 || amount > userBalance) {
-      // This check is a safeguard, validateAmount should handle UI feedback
-      return;
-    }
 
     try {
-      // 1. Create a withdrawal request record
+      // 1. Create a withdrawal request in withdrawals collection
       await addDoc(collection(db, "withdrawals"), {
-        userId: userId,
-        amount: amount,
+        userId,
+        amount,
         currency: userCurrencyCode,
-        status: "pending", // Or 'requested'
+        status: "pending",
         createdAt: new Date().toISOString()
       });
 
-      // 2. Update user's balance using a transaction
+      // 2. Subtract balance and log to transactions
       const userRef = doc(db, "users", userId);
+      const transactionRef = collection(db, "users", userId, "transactions");
+
       await runTransaction(db, async (transaction) => {
         const userDoc = await transaction.get(userRef);
-        if (!userDoc.exists()) {
-          throw new Error("User not found for balance update.");
-        }
+        if (!userDoc.exists()) throw new Error("User not found.");
+
         const currentBalance = userDoc.data().balance || 0;
-        if (amount > currentBalance) {
-          throw new Error("Insufficient balance for withdrawal.");
-        }
+        if (amount > currentBalance) throw new Error("Insufficient balance.");
+
         const newBalance = currentBalance - amount;
-        transaction.update(userRef, {
-          balance: newBalance
+        transaction.update(userRef, { balance: newBalance });
+
+        // 3. Add to transactions as withdraw
+        await addDoc(transactionRef, {
+          type: "withdraw",
+          amount,
+          currency: userCurrencyCode,
+          timestamp: serverTimestamp()
         });
       });
 
-      alert('Withdrawal request submitted successfully! Your balance will be updated shortly.');
-      // Update UI immediately (optional, but good for responsiveness)
+      alert('Withdrawal request submitted successfully!');
       userBalance -= amount;
-      balanceEl.textContent = parseFloat(userBalance).toFixed(2);
-      amountInput.value = ''; // Clear amount input
-      validateAmount(); // Re-validate to update button state
+      balanceEl.textContent = userBalance.toFixed(2);
+      amountInput.value = '';
+      validateAmount();
 
-      setTimeout(() => {
-        window.location.href = "dashboard.html";
-      }, 2000); // Redirect after 2 seconds
+      setTimeout(() => window.location.href = "dashboard.html", 2000);
     } catch (error) {
       console.error("Withdrawal error:", error);
-      let userFacingError = "Error processing withdrawal. Please try again.";
-      if (error.message.includes("Insufficient balance")) {
-        userFacingError = "Withdrawal failed: Insufficient balance.";
-      } else if (error.message.includes("User not found")) {
-         userFacingError = "Withdrawal failed: User account not found. Please re-login.";
-         localStorage.removeItem("uid"); // Clear potentially bad UID
-         setTimeout(() => window.location.href = "login.html", 2000);
-      }
-      alert(userFacingError);
+      alert(error.message || "An error occurred. Try again.");
     }
   });
 
@@ -346,57 +323,43 @@
       </div>
     `;
 
-    // Order of inputs changed for better UX
-    const bankNameInput = document.getElementById('bankName');
-    const firstNameInput = document.getElementById('firstName');
-    const accountNumberInput = document.getElementById('accountNumber');
-    const ifscCodeInput = document.getElementById('ifscCode');
-    const mobileInput = document.getElementById('mobile');
-
-    const inputs = [bankNameInput, firstNameInput, accountNumberInput, ifscCodeInput, mobileInput];
+    const inputs = [
+      document.getElementById('bankName'),
+      document.getElementById('firstName'),
+      document.getElementById('accountNumber'),
+      document.getElementById('ifscCode'),
+      document.getElementById('mobile')
+    ];
     const confirmBtn = document.getElementById('confirm-btn');
 
-    const validateForm = () => {
+    inputs.forEach(input => input.addEventListener('input', () => {
       const allFilled = inputs.every(input => input.value.trim() !== '');
       confirmBtn.disabled = !allFilled;
       confirmBtn.classList.toggle('active', allFilled);
-    };
-
-    inputs.forEach(input => input.addEventListener('input', validateForm));
+    }));
 
     confirmBtn.addEventListener('click', async () => {
-      if (!confirmBtn.classList.contains('active')) return;
-
-      // !!! WARNING !!! This "admin authorization code" is highly insecure.
-      // For production, this should be handled on a secure backend (e.g., Firebase Cloud Function).
-      // Client-side prompt for sensitive authorization is a major security vulnerability.
-      const code = prompt("Enter admin authorization code:");
-      if (!code) { // User clicked cancel
-          alert("Authorization cancelled.");
-          return;
-      }
-      const codeDocRef = doc(db, "settings", "authCode");
-      const codeDocSnap = await getDoc(codeDocRef);
-      const validCode = codeDocSnap.exists() ? codeDocSnap.data().code : null;
-
-      if (code !== validCode) {
-        alert("Invalid authorization code.");
+      const enteredPin = prompt("Enter authorization pin:");
+      const authCodeRef = doc(db, "settings", "authCode");
+      const authSnap = await getDoc(authCodeRef);
+      if (!authSnap.exists() || enteredPin !== authSnap.data().code) {
+        alert("Invalid or missing authorization code.");
         return;
       }
 
       const bankDetails = {
         userId,
-        bankName: bankNameInput.value.trim(),
-        firstName: firstNameInput.value.trim(),
-        accountNumber: accountNumberInput.value.trim(),
-        ifscCode: ifscCodeInput.value.trim(),
-        mobile: mobileInput.value.trim(),
+        bankName: inputs[0].value.trim(),
+        firstName: inputs[1].value.trim(),
+        accountNumber: inputs[2].value.trim(),
+        ifscCode: inputs[3].value.trim(),
+        mobile: inputs[4].value.trim(),
         addedAt: new Date().toISOString()
       };
 
       try {
-        await setDoc(doc(db, 'bankAccounts', userId), bankDetails); // Use setDoc to create/overwrite
-
+        await setDoc(doc(db, 'bankAccounts', userId), bankDetails);
+        alert("Bank added successfully!");
         bankPlaceholder.innerHTML = `
           <div class="bank-info">
             <div>
@@ -407,23 +370,19 @@
           </div>
         `;
         bankAdded = true;
-        validateAmount(); // Update button state
-        alert("Bank account added successfully!");
-      } catch (error) {
-        console.error("Error adding bank account:", error);
-        alert("Failed to add bank account. Please try again.");
+        validateAmount();
+      } catch (err) {
+        console.error("Bank save failed:", err);
+        alert("Failed to save bank details.");
       }
     });
   });
 
-  // Initial fetches when the page loads
   document.addEventListener('DOMContentLoaded', async () => {
     await fetchUserInfo();
     await checkBankAccount();
-    validateAmount(); // Initial validation for button state
+    validateAmount();
   });
-
 </script>
-
 </body>
 </html>
