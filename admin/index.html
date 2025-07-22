@@ -2,126 +2,53 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Admin User Table</title>
+  <title>Admin Dashboard</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
-      background: #000; /* Black background */
-      font-size: 27px;
+      background: #000;
       color: #fff;
     }
-
-    #login-container {
-      background: #1a1a1a;
-      border-radius: 8px;
-      padding: 30px;
-      box-shadow: 0 2px 10px rgba(255,255,255,0.1);
-      width: 300px;
-      margin: 50px auto;
-      text-align: center;
-    }
-
-    .login-input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border: 1px solid #444;
-      border-radius: 4px;
-      box-sizing: border-box;
-      background: #333;
-      color: white;
-    }
-
-    .login-button {
-      background-color: #5cb85c;
-      color: white;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    .login-error {
-      color: red;
-      margin-top: 10px;
-    }
-
-    #user-table-container {
-      display: none;
-    }
-
-    .user-table {
+    .container { max-width: 1000px; margin: auto; }
+    h2 { margin-top: 40px; }
+    .user-table, #withdrawals-container {
       background: #1a1a1a;
       border-radius: 8px;
       padding: 20px;
       box-shadow: 0 2px 10px rgba(255,255,255,0.1);
-      width: 98%;
-      margin: 20px auto;
+      width: 100%;
+      margin: 20px 0;
       overflow-x: auto;
-      color: #fff;
     }
-
-    .search-bar {
-      margin-bottom: 15px;
-    }
-
     .search-bar input {
       width: 100%;
       padding: 10px;
       font-size: 16px;
       border-radius: 6px;
       border: 1px solid #555;
-      box-sizing: border-box;
       background: #222;
       color: white;
+      margin-bottom: 15px;
     }
-
     .table-header, .table-row {
       display: grid;
-      grid-template-columns: 0.4fr 1.4fr 1.2fr 1.5fr 1.5fr;
-      align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid #444;
+      grid-template-columns: 0.3fr 1.2fr 2fr 1.2fr 1.2fr 1.2fr;
+      white-space: nowrap;
     }
-
-    .table-header {
-      font-weight: bold;
-    }
-
+    .table-header { font-weight: bold; }
     .cell {
       padding: 8px 5px;
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap;
     }
-
-    .cell.actions {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-    }
-
+    .cell.actions { display: flex; gap: 10px; justify-content: center; }
     .cell.actions button {
-      background: none;
-      border: none;
-      padding: 5px 10px;
-      cursor: pointer;
-      font-size: 14px;
-      color: #ddd;
+      background: none; border: none;
+      padding: 5px 10px; cursor: pointer;
+      font-size: 14px; color: #ddd;
     }
-
-    .hidden-save-cancel {
-      display: none;
-    }
-
-    .cell input {
-      width: 90%;
-      padding: 4px;
-      font-size: 14px;
-    }
-
+    input[type="number"] { width: 90%; padding: 4px; font-size: 14px; }
     #logout-button {
       background-color: #d9534f;
       color: white;
@@ -135,37 +62,43 @@
   </style>
 </head>
 <body>
+  <div class="container">
+    <div id="login-container">
+      <h2>Admin Login</h2>
+      <input type="password" id="login-password" placeholder="Password">
+      <button id="login-btn">Log In</button>
+      <div id="login-error" style="color:red; margin-top:10px;"></div>
+    </div>
 
-<div id="login-container">
-  <h2>Login</h2>
-  <input type="password" id="login-password" class="login-input" placeholder="Password">
-  <button class="login-button" id="login-btn">Log In</button>
-  <div id="login-error" class="login-error"></div>
-</div>
+    <div id="dashboard" style="display:none;">
+      <h2>User Management</h2>
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search by username or balance...">
+      </div>
+      <div class="user-table">
+        <div class="table-header">
+          <div class="cell">No.</div>
+          <div class="cell">Username</div>
+          <div class="cell">Email</div>
+          <div class="cell">Balance</div>
+          <div class="cell">Action</div>
+          <div class="cell">Action</div>
+        </div>
+        <div id="tableBody"></div>
+        <button id="logout-button">Log Out</button>
+      </div>
 
-<div id="user-table-container" class="user-table">
-  <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="Search by username...">
+      <h2>Manage Withdrawals</h2>
+      <div id="withdrawals-container"></div>
+    </div>
   </div>
 
-  <div class="table-header">
-    <div class="cell">No.</div>
-    <div class="cell">Username</div>
-    <div class="cell">Balance</div>
-    <div class="cell">Action 1</div>
-    <div class="cell">Action 2</div>
-  </div>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
-  <div id="tableBody"></div>
-  <button id="logout-button">Log Out</button>
-</div>
-
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-
-<script>
- const firebaseConfig = {
+  <script>
+    const firebaseConfig = {
       apiKey: "AIzaSyDtCfsMkc_Z_9ZeF0TEHTDFBzLlkU-egSc",
       authDomain: "tradevanta-a3e0d.firebaseapp.com",
       projectId: "tradevanta-a3e0d",
@@ -173,154 +106,176 @@
       messagingSenderId: "441098922985",
       appId: "1:441098922985:web:163878a0ef5b2054f8b978"
     };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+    const loginContainer = document.getElementById('login-container');
+    const dashboard = document.getElementById('dashboard');
+    const loginError = document.getElementById('login-error');
+    const loginBtn = document.getElementById('login-btn');
+    const loginPwd = document.getElementById('login-password');
+    const tableBody = document.getElementById('tableBody');
+    const searchInput = document.getElementById('searchInput');
+    const logoutButton = document.getElementById('logout-button');
+    const withdrawalsContainer = document.getElementById('withdrawals-container');
 
-  const loginContainer = document.getElementById('login-container');
-  const userTableContainer = document.getElementById('user-table-container');
-  const loginPasswordInput = document.getElementById('login-password');
-  const loginBtn = document.getElementById('login-btn');
-  const loginErrorDiv = document.getElementById('login-error');
-  const tableBody = document.getElementById('tableBody');
-  const searchInput = document.getElementById('searchInput');
-  const logoutButton = document.getElementById('logout-button');
+    const adminEmail = "pietanor@choco.la";
+    let users = [];
 
-  let users = [];
-  const predefinedEmail = "pietanor@choco.la";
+    async function fetchUsers() {
+      const snapshot = await db.collection('users').get();
+      users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderUsers();
+    }
 
-  async function fetchUsers() {
-    const snapshot = await db.collection('users').get();
-    users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    renderTable(searchInput.value);
-  }
-
-  function renderTable(filter = '') {
-    tableBody.innerHTML = '';
-    users
-      .filter(user =>
-        (user.username?.toLowerCase().includes(filter.toLowerCase())) ||
-        (user.balance?.toString().includes(filter))
-      )
-      .forEach((user, index) => {
+    function renderUsers(filter = '') {
+      tableBody.innerHTML = '';
+      users.filter(u =>
+        u.username?.toLowerCase().includes(filter.toLowerCase()) ||
+        (u.balance && u.balance.toString().includes(filter))
+      ).forEach((user, idx) => {
         const row = document.createElement('div');
         row.className = 'table-row';
-
-        const balanceDisplay = user.balance !== undefined
-          ? `${user.currency ? user.currency + ' ' : ''}${parseFloat(user.balance).toFixed(2)}`
+        const balance = user.balance !== undefined
+          ? `${user.currency||''} ${parseFloat(user.balance).toFixed(2)}`
           : '';
-
-        const cells = `
-          <div class="cell">${index + 1}</div>
-          <div class="cell">${user.username || ''}</div>
-          <div class="cell">${balanceDisplay}</div>
-          <div class="cell">
-            <button class="edit-btn" title="Edit">Edit ✍️</button>
-            <div class="hidden-save-cancel" style="display:none;">
-              <button class="save-btn" title="Save">✔️</button>
-            </div>
+        row.innerHTML = `
+          <div class="cell">${idx+1}</div>
+          <div class="cell">${user.username||''}</div>
+          <div class="cell">${user.email||''}</div>
+          <div class="cell">${balance}</div>
+          <div class="cell actions">
+            <button class="edit-btn">✍️</button>
+            <button class="save-btn" style="display:none;">✅</button>
           </div>
-          <div class="cell">
-            <button class="delete-btn" title="Delete">Delete 🗑️</button>
-          </div>
-        `;
-        row.innerHTML = cells;
-
+          <div class="cell actions">
+            <button class="delete-btn">🗑️</button>
+          </div>`;
         const editBtn = row.querySelector('.edit-btn');
+        const saveBtn = row.querySelector('.save-btn');
         const deleteBtn = row.querySelector('.delete-btn');
-        const saveCancelDiv = row.querySelector('.hidden-save-cancel');
-        const saveBtn = saveCancelDiv.querySelector('.save-btn');
-
-        const editableCell = row.querySelectorAll('.cell')[2];
+        const balanceCell = row.querySelectorAll('.cell')[3];
 
         editBtn.addEventListener('click', () => {
-          startEdit(editableCell, user);
+          balanceCell.innerHTML = `<input type="number" value="${user.balance}">`;
           editBtn.style.display = 'none';
-          saveCancelDiv.style.display = 'flex';
+          saveBtn.style.display = 'inline';
         });
-
         saveBtn.addEventListener('click', async () => {
-          const updatedBalance = getUpdatedBalance(editableCell);
-          if (updatedBalance !== null) {
-            try {
-              await db.collection('users').doc(user.id).update({ balance: updatedBalance });
-              users = users.map(u => u.id === user.id ? { ...u, balance: updatedBalance } : u);
-              renderTable(searchInput.value);
-            } catch (error) {
-              console.error("Error updating balance:", error);
-              alert("Failed to update balance.");
-            }
+          const num = parseFloat(balanceCell.querySelector('input').value);
+          if (isNaN(num)) return alert("Enter valid number");
+          try {
+            await db.collection('users').doc(user.id).update({ balance: num });
+            await db.collection('users').doc(user.id)
+              .collection('transactions').add({
+                type: "deposit",
+                amount: num,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                status: "completed"
+              });
+            user.balance = num;
+            renderUsers(searchInput.value);
+            fetchWithdrawals();
+          } catch (err) {
+            console.error(err);
+            alert("Update failed");
           }
         });
-
         deleteBtn.addEventListener('click', async () => {
-          if (confirm(`Delete user: ${user.username}?`)) {
-            try {
-              await db.collection('users').doc(user.id).delete();
-              users = users.filter(u => u.id !== user.id);
-              renderTable(searchInput.value);
-            } catch (error) {
-              console.error("Delete error:", error);
-              alert("Failed to delete user.");
-            }
+          if (!confirm(`Delete ${user.username}?`)) return;
+          try {
+            await db.collection('users').doc(user.id).delete();
+            users = users.filter(u => u.id !== user.id);
+            renderUsers(searchInput.value);
+            fetchWithdrawals();
+          } catch (e) {
+            console.error(e);
+            alert("Delete failed");
           }
         });
 
         tableBody.appendChild(row);
       });
-  }
-
-  function startEdit(cell, user) {
-    const input = document.createElement('input');
-    input.value = user.balance;
-    input.type = 'number';
-    cell.innerHTML = '';
-    cell.appendChild(input);
-  }
-
-  function getUpdatedBalance(cell) {
-    const val = cell.querySelector('input').value;
-    const num = parseFloat(val);
-    if (isNaN(num)) {
-      alert("Enter a valid number for balance");
-      return null;
     }
-    return num;
-  }
 
-  searchInput.addEventListener('input', () => renderTable(searchInput.value));
+    async function fetchWithdrawals() {
+      withdrawalsContainer.innerHTML = '';
+      const usersSnap = await db.collection('users').get();
+      let html = `<div class="table-header" style="grid-template-columns: 1fr 1fr 1.5fr 1fr;">
+        <div class="cell">User</div>
+        <div class="cell">Amount</div>
+        <div class="cell">Date</div>
+        <div class="cell">Status</div>
+      </div>`;
 
-  loginBtn.addEventListener('click', async () => {
-    const password = loginPasswordInput.value;
-    try {
-      await auth.signInWithEmailAndPassword(predefinedEmail, password);
-      loginContainer.style.display = 'none';
-      userTableContainer.style.display = 'block';
-      await fetchUsers();
-    } catch {
-      loginErrorDiv.textContent = "Incorrect password.";
+      for (const udoc of usersSnap.docs) {
+        const u = udoc.data();
+        const txSnap = await db.collection('users')
+          .doc(udoc.id).collection('transactions')
+          .where('type','==','withdraw').orderBy('timestamp','desc').get();
+
+        txSnap.docs.forEach(doc => {
+          const t = doc.data();
+          const amt = parseFloat(t.amount).toFixed(2);
+          const status = t.status || 'pending';
+          html += `
+            <div class="table-row" style="grid-template-columns: 1fr 1fr 1.5fr 1fr;">
+              <div class="cell">${u.username}</div>
+              <div class="cell">${u.currency||'USD'} ${amt}</div>
+              <div class="cell">${t.timestamp?.toDate().toLocaleString()||''}</div>
+              <div class="cell">
+                <select data-user="${udoc.id}" data-txid="${doc.id}" onchange="updateTransactionStatus(this)">
+                  <option value="pending" ${status==='pending'?'selected':''}>🕒 Pending</option>
+                  <option value="processing" ${status==='processing'?'selected':''}>🔄 Processing</option>
+                  <option value="completed" ${status==='completed'?'selected':''}>✅ Completed</option>
+                  <option value="canceled" ${status==='canceled'?'selected':''}>❌ Canceled</option>
+                </select>
+              </div>
+            </div>`;
+        });
+      }
+
+      withdrawalsContainer.innerHTML = html || '<p>No withdrawals found.</p>';
     }
-  });
 
-  logoutButton.addEventListener('click', async () => {
-    await auth.signOut();
-    loginContainer.style.display = 'block';
-    userTableContainer.style.display = 'none';
-    tableBody.innerHTML = '';
-  });
-
-  auth.onAuthStateChanged(async user => {
-    if (user) {
-      loginContainer.style.display = 'none';
-      userTableContainer.style.display = 'block';
-      await fetchUsers();
-    } else {
-      loginContainer.style.display = 'block';
-      userTableContainer.style.display = 'none';
+    async function updateTransactionStatus(select) {
+      const userId = select.dataset.user;
+      const txId = select.dataset.txid;
+      const status = select.value;
+      try {
+        await db.collection('users')
+          .doc(userId).collection('transactions')
+          .doc(txId).update({ status });
+        alert(`Status updated to ${status}`);
+      } catch (err) {
+        console.error(err);
+        alert("Failed to update status");
+      }
     }
-  });
-</script>
 
+    loginBtn.addEventListener('click', async () => {
+      try {
+        await auth.signInWithEmailAndPassword(adminEmail, loginPwd.value);
+      } catch {
+        return loginError.textContent = "Incorrect password.";
+      }
+    });
+
+    auth.onAuthStateChanged(user => {
+      if (user && user.email === adminEmail) {
+        loginContainer.style.display = 'none';
+        dashboard.style.display = 'block';
+        fetchUsers();
+        fetchWithdrawals();
+      } else {
+        loginContainer.style.display = 'block';
+        dashboard.style.display = 'none';
+      }
+    });
+
+    logoutButton.addEventListener('click', () => auth.signOut());
+    searchInput.addEventListener('input', () => renderUsers(searchInput.value));
+  </script>
 </body>
 </html>
