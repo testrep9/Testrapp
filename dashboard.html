@@ -272,42 +272,37 @@
       if (user) {
         listenToUserData(user.uid);
       } else {
-        window.location.href = "login.html";
+        window.location.href = "register.html";
       }
     });
 
     document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById('deposit-button').addEventListener('click', () => {
-        if (window.jivo_api) jivo_api.open();
-      });
+  const serviceItems = document.querySelectorAll('.service-item');
 
-      document.getElementById('transfer-button').addEventListener('click', () => {
-        if (window.jivo_api) jivo_api.open();
-      });
+  serviceItems.forEach(item => {
+    const id = item.id;
 
-      const serviceItems = document.querySelectorAll('.service-item');
-      serviceItems.forEach(item => {
-        if (!['logout-button', 'history-button'].includes(item.id)) {
-          item.addEventListener('click', () => {
-            if (window.jivo_api) jivo_api.open();
-          });
-        }
-      });
-
-      document.getElementById('logout-button').addEventListener('click', async () => {
+    if (id === 'logout-button') {
+      item.addEventListener('click', async () => {
         try {
           await signOut(auth);
           alert("You have been logged out.");
-          window.location.href = "login.html";
+          window.location.href = "register.html"; // changed from login.html
         } catch (error) {
           console.error("Logout error:", error);
         }
       });
-
-      document.getElementById('history-button').addEventListener('click', () => {
+    } else if (id === 'history-button') {
+      item.addEventListener('click', () => {
         window.location.href = 'history.html';
       });
-    });
+    } else {
+      item.addEventListener('click', () => {
+        if (window.jivo_api) jivo_api.open();
+      });
+    }
+  });
+});
   </script>
 </body>
 </html>
