@@ -251,7 +251,7 @@
 
     function updateBalanceDisplay(balance, currencyCode) {
       const symbol = currencySymbols[currencyCode] || '$';
-      document.getElementById('balance-amount').textContent = `≈ ${symbol}${parseFloat(balance).toFixed(2)}`;
+      document.getElementById('balance-amount').textContent = ` ${symbol}${parseFloat(balance).toFixed(2)}`;
     }
 
     function listenToUserData(userId) {
